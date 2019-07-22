@@ -1,0 +1,15 @@
+﻿<Window x:Class="Ultrabit.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Ultrabit"
+        mc:Ignorable="d"
+        Title="ultra:bit" Height="450" Width="800">
+    <Grid Background="#FF01B9BB">
+        <Image x:Name="image" HorizontalAlignment="Left" Height="100" Margin="457,41,0,0" VerticalAlignment="Top" Width="100" Source="Resources\logo_happy.png" />
+        <Label x:Name="label" Content="ultra:bit" HorizontalAlignment="Left" Margin="254,49,0,0" VerticalAlignment="Top" FontSize="48" FontFamily="Segoe UI Semibold"/>
+        <Image x:Name="image1" HorizontalAlignment="Left" Height="220" Margin="199,159,0,0" VerticalAlignment="Top" Width="396" Source="Resources\connect_ultrabit.png"/>
+
+    </Grid>
+</Window>
