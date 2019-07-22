@@ -25,7 +25,7 @@ namespace Ultrabit
     {
         private ManagementEventWatcher _watcher;
         private string _ultrabitDrive = "";
-        private string _hexFile = @"C:\Users\kmai\Lokale Dokumenter\Visual Studio Projects\ultrabit-filemover\Ultrabit\Ultrabit\bin\Debug\dfdf.hex";
+        private string _hexFile = "";
 
         private delegate void UiUpdateHandler();
 
@@ -92,7 +92,7 @@ namespace Ultrabit
 
             foreach(DriveInfo d in drives)
             {
-                if(d.DriveType == DriveType.Removable && d.VolumeLabel == "USB DISK")
+                if(d.DriveType == DriveType.Removable && d.VolumeLabel == "MICROBIT")
                 {
                     return d.Name;
                 }
