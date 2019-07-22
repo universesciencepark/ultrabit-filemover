@@ -18,6 +18,8 @@ using System.Windows.Threading;
 
 namespace Ultrabit
 {
+    
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -26,6 +28,7 @@ namespace Ultrabit
         private ManagementEventWatcher _watcher;
         private string _ultrabitDrive = "";
         private string _hexFile = "";
+        private readonly StateMachine _state = new StateMachine();
 
         private delegate void UiUpdateHandler();
 
@@ -35,30 +38,107 @@ namespace Ultrabit
 
             this.Loaded += MainWindow_Loaded;
             this.Unloaded += MainWindow_Unloaded;
+            _state.OnStateChange += _state_OnStateChange;
         }
 
+        private async void _state_OnStateChange(eState oldState, eState newState)
+        {
+            if(newState == eState.INIT_WITH_FILE)
+            {
+                // Nu skal vi controllere om microbit er tilstede
+                _ultrabitDrive = GetUltrabitUSB();
+
+                if(_ultrabitDrive != "")
+                {
+                    // Microbit er tilstede så påbegynd kopiering af .hex fil
+                    _state.State = eState.COPY_IN_PROGRESS;
+                } else
+                {
+                    _state.State = eState.INIT_NO_MICROBIT;
+                }   
+            }
+
+            if(newState == eState.INIT_NO_MICROBIT)
+            {
+                RegisterManagementEventWatching();
+                image.Dispatcher.Invoke(new UiUpdateHandler(UiNoMicrobit));
+            }
+
+            if(newState == eState.MICROBIT_CONNECTED)
+            {
+                image.Dispatcher.Invoke(new UiUpdateHandler(UiMicrobitConnected));
+            }
+
+            if(newState == eState.COPY_IN_PROGRESS)
+            {
+                GridCopy.Visibility = Visibility.Visible;
+                DispatcherTimer t = new DispatcherTimer();
+                t.Interval = TimeSpan.FromMilliseconds(10);
+                t.Tick += TimerCopyProgress;
+                t.Start();
+
+                using (FileStream SourceStream = File.Open(_hexFile, FileMode.Open))
+                {
+                    using (FileStream DestinationStream = File.Create(_ultrabitDrive + System.IO.Path.GetFileName(_hexFile)))
+                    {
+                        await SourceStream.CopyToAsync(DestinationStream);
+                        _state.State = eState.COPY_COMPLETED;
+                    }
+                }
+            }
+
+            if(newState == eState.COPY_COMPLETED)
+            {
+                GridCopy.Visibility = Visibility.Hidden;
+                image1.Source = new BitmapImage(new Uri(@"Resources/ready.png", UriKind.Relative));
+                image1.Visibility = Visibility.Visible;
+
+                DispatcherTimer t = new DispatcherTimer();
+                t.Tick += T_Tick;
+                t.Interval = TimeSpan.FromSeconds(5);
+                t.Start();
+            }
+        }
+
+        private void UiNoMicrobit()
+        {
+            image.Source = new BitmapImage(new Uri(@"Resources/logo_sad.png", UriKind.Relative));
+            image1.Visibility = Visibility.Visible;
+        }
+
+        private void UiMicrobitConnected()
+        {
+            image.Source = new BitmapImage(new Uri(@"Resources/logo_happy.png", UriKind.Relative));
+            image1.Visibility = Visibility.Hidden;
+            _state.State = eState.COPY_IN_PROGRESS;
+        }
+
+        private void TimerCopyProgress(object sender, EventArgs e)
+        {
+            progressBar1.Value += 0.25;
+
+            if (progressBar1.Value >= 100)
+            {
+                (sender as DispatcherTimer).Stop();
+            }
+        }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            RegisterManagementEventWatching();
+            //Application.Current.Properties["Filename"] = @"C:\Users\kaare_269anzg\Lokale dokumenter\Visual Studio Projekter\ultrabit-filemover\Ultrabit\Ultrabit\bin\Debug\test.hex";
 
             if (Application.Current.Properties["Filename"] != null)
             {
                 _hexFile = Application.Current.Properties["Filename"].ToString();
+                _state.State = eState.INIT_WITH_FILE;
+            } else
+            {
+                _state.State = eState.INIT_NO_FILE;
+                this.Close();
             }
-
-            DispatcherTimer t = new DispatcherTimer();
-            t.Interval = TimeSpan.FromMilliseconds(200);
-            t.Tick += T_Tick1;
-            t.Start();
         }
 
-        private void T_Tick1(object sender, EventArgs e)
-        {
-            (sender as DispatcherTimer).Stop();
-
-            image.Dispatcher.Invoke(new UiUpdateHandler(UpdateUi));
-        }
+        
 
         private void MainWindow_Unloaded(object sender, RoutedEventArgs e)
         {
@@ -66,27 +146,6 @@ namespace Ultrabit
             {
                 _watcher.Stop();
                 _watcher.EventArrived -= watcher_EventArrived;
-            }
-        }
-
-        private void UpdateUi()
-        {
-            _ultrabitDrive = GetUltrabitUSB();
-
-            if (_ultrabitDrive == "")
-            {
-                image.Source = new BitmapImage(new Uri(@"Resources/logo_sad.png", UriKind.Relative));
-            } else
-            {
-                image.Source = new BitmapImage(new Uri(@"Resources/logo_happy.png", UriKind.Relative));
-                image1.Source = new BitmapImage(new Uri(@"Resources/ready.png", UriKind.Relative));
-
-                DispatcherTimer t = new DispatcherTimer();
-                t.Tick += T_Tick;
-                t.Interval = TimeSpan.FromSeconds(5);
-                t.Start();
-
-                File.Move(_hexFile, _ultrabitDrive + System.IO.Path.GetFileName(_hexFile));
             }
         }
 
@@ -115,7 +174,7 @@ namespace Ultrabit
         private void RegisterManagementEventWatching()
         {
             _watcher = new ManagementEventWatcher();
-            var query = new WqlEventQuery("SELECT * FROM __InstanceCreationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_USBHub'");
+            var query = new WqlEventQuery("SELECT * FROM Win32_VolumeChangeEvent WHERE EventType = 2");
             _watcher.EventArrived += watcher_EventArrived;
             _watcher.Query = query;
             _watcher.Start();
@@ -123,7 +182,11 @@ namespace Ultrabit
 
         private void watcher_EventArrived(object sender, EventArrivedEventArgs e)
         {
-            image.Dispatcher.Invoke(new UiUpdateHandler(UpdateUi));
+            _ultrabitDrive = GetUltrabitUSB();
+            if (_ultrabitDrive != "")
+            {
+                _state.State = eState.MICROBIT_CONNECTED;
+            }
         }
     }
 }
