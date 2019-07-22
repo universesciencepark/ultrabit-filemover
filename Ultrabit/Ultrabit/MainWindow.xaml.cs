@@ -46,7 +46,18 @@ namespace Ultrabit
             {
                 _hexFile = Application.Current.Properties["Filename"].ToString();
             }
-            UpdateUi();
+
+            DispatcherTimer t = new DispatcherTimer();
+            t.Interval = TimeSpan.FromMilliseconds(200);
+            t.Tick += T_Tick1;
+            t.Start();
+        }
+
+        private void T_Tick1(object sender, EventArgs e)
+        {
+            (sender as DispatcherTimer).Stop();
+
+            image.Dispatcher.Invoke(new UiUpdateHandler(UpdateUi));
         }
 
         private void MainWindow_Unloaded(object sender, RoutedEventArgs e)
