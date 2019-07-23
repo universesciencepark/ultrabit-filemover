@@ -125,7 +125,7 @@ namespace Ultrabit
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            //Application.Current.Properties["Filename"] = @"C:\Users\kaare_269anzg\Lokale dokumenter\Visual Studio Projekter\ultrabit-filemover\Ultrabit\Ultrabit\bin\Debug\test.hex";
+            //Application.Current.Properties["Filename"] = @"C:\Users\kmai\Lokale Dokumenter\Visual Studio Projects\ultrabit-filemover\Ultrabit\Ultrabit\bin\Debug\microbit-test.hex";
 
             if (Application.Current.Properties["Filename"] != null)
             {
