@@ -10,9 +10,9 @@
         <Image x:Name="image" HorizontalAlignment="Left" Height="100" Margin="457,41,0,0" VerticalAlignment="Top" Width="100" Source="Resources\logo_happy.png" />
         <Label x:Name="label" Content="ultra:bit" HorizontalAlignment="Left" Margin="254,49,0,0" VerticalAlignment="Top" FontSize="48" FontFamily="Segoe UI Semibold"/>
         <Image x:Name="image1" HorizontalAlignment="Left" Height="220" Margin="199,159,0,0" VerticalAlignment="Top" Width="396" Source="Resources\connect_ultrabit.png" Visibility="Hidden"/>
-        <Grid x:Name="GridCopy" HorizontalAlignment="Left" Height="220" Margin="119,159,0,0" VerticalAlignment="Top" Width="566" Background="#FF01B9BB" Visibility="Hidden">
+        <Grid x:Name="GridCopy" HorizontalAlignment="Left" Height="220" Margin="119,159,0,0" VerticalAlignment="Top" Width="566" Background="#FF01B9BB" Visibility="Visible">
             <ProgressBar x:Name="progressBar1" HorizontalAlignment="Left" Height="32" Margin="77,136,0,0" VerticalAlignment="Top" Width="406" Foreground="#FFD5F100" Background="#FF09A3A4" BorderBrush="#FF01B9BB"/>
-            <Label x:Name="label1" Content="Overfører fil / Transferring file" HorizontalAlignment="Left" Margin="153,81,0,0" VerticalAlignment="Top" Height="35" Width="270" FontSize="18" FontFamily="Segoe UI Semibold" Background="#00000000" Foreground="#FFECECEC"/>
+            <Label x:Name="label1" Content="Overfører fil / Transferring file" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="77,81,0,0" VerticalAlignment="Top" Height="35" Width="406" FontSize="18" FontFamily="Segoe UI Semibold" Background="#00000000" Foreground="#FFECECEC"/>
         </Grid>
 
 

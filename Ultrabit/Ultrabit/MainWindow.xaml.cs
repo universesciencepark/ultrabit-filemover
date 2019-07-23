@@ -82,7 +82,13 @@ namespace Ultrabit
                     using (FileStream DestinationStream = File.Create(_ultrabitDrive + System.IO.Path.GetFileName(_hexFile)))
                     {
                         await SourceStream.CopyToAsync(DestinationStream);
-                        _state.State = eState.COPY_COMPLETED;
+
+                        label1.Content = "Genstarter ultra:bit / Rebooting ultra:bit";
+
+                        DispatcherTimer t1 = new DispatcherTimer();
+                        t1.Interval = TimeSpan.FromSeconds(6);
+                        t1.Tick += TimerOnCopyComplete;
+                        t1.Start();
                     }
                 }
             }
@@ -100,6 +106,16 @@ namespace Ultrabit
             }
         }
 
+        private void TimerOnCopyComplete(object sender, EventArgs e)
+        {
+            (sender as DispatcherTimer).Stop();
+
+            // Vi skal lige slette filen fra downloadmappen
+            File.Delete(_hexFile);
+
+            _state.State = eState.COPY_COMPLETED;
+        }
+
         private void UiNoMicrobit()
         {
             image.Source = new BitmapImage(new Uri(@"Resources/logo_sad.png", UriKind.Relative));
@@ -115,7 +131,7 @@ namespace Ultrabit
 
         private void TimerCopyProgress(object sender, EventArgs e)
         {
-            progressBar1.Value += 0.25;
+            progressBar1.Value += 0.12;
 
             if (progressBar1.Value >= 100)
             {
